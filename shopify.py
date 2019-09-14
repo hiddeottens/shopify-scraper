@@ -154,6 +154,35 @@ def extract_products(url, path, collections=None):
                                  product['stock'], product['product_url'],
                                  product['image_src'], product['body']])
 
+def extract_products_json(url, path, collections=None):
+    products = []
+    seen_variants = set()
+    for col in get_page_collections(url):
+        if collections and col['handle'] not in collections:
+            continue
+        handle = col['handle']
+        title = col['title']
+        for product in extract_products_collection(url, handle):
+            variant_id = product['variant_id']
+            if variant_id in seen_variants:
+                continue
+
+            seen_variants.add(variant_id)
+
+            product = ({
+                'type': product['product_type'],
+                'title': product['title'], 
+                'optionValue': product['option_value'],
+                'price': product['price'],
+                'stock': product['stock'], 
+                'url': product['product_url'],
+                'image': product['image_src'], 
+                'description': product['body']
+            })
+
+            products.append(product)
+
+    return products
 
 if __name__ == '__main__':
     parser = OptionParser()
